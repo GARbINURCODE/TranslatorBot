@@ -20,7 +20,8 @@ class TranslatorCl:
 
 # Translation of a text
     def Translation(self, text):
-        result = translator.translate(text, src=self.fromlang)
+        result = translator.translate(text,
+                                      src=self.fromlang)
         return result.text
 
 # The method translates .docx files

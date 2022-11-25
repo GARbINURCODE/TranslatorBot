@@ -1,9 +1,9 @@
 import telebot
 import keyboards
 import config
-import messages
 import totranslate
 import time
+import scraper
 
 # Some objects of classes that we need
 bot = telebot.TeleBot(config.token)
@@ -13,7 +13,9 @@ translator = totranslate.TranslatorCl()
 # Command start handler and the suggestion to set home language in markup
 @bot.message_handler(commands=["start"])
 def start(message):
-    msg = bot.send_message(message.chat.id, messages.hello,
+    msg = bot.send_message(message.chat.id, f"Hi, {message.from_user.first_name}. "
+                                            f"I`m a translator bot. "
+                                            f"Do u want to translate something?",
                            reply_markup=keyboards.hello_markup())
     bot.register_next_step_handler(msg, hello_markup_handler)
 
@@ -42,9 +44,12 @@ def set_type_markup_handler(message):
     if message.text == 'Just text':
         msg = bot.send_message(message.chat.id, 'Please, print the text in your language:')
         bot.register_next_step_handler(msg, text_handler)
-    else:
+    elif message.text == 'A document':
         msg = bot.send_message(message.chat.id, 'Please, send you docx or txt file:')
         bot.register_next_step_handler(msg, docs_handler)
+    else:
+        msg = bot.send_message(message.chat.id, 'Please, send the link:')
+        bot.register_next_step_handler(msg, url_handler)
 
 
 # We use TranslatorCl object to translate this text
@@ -55,7 +60,7 @@ def text_handler(message):
     bot.register_next_step_handler(msg, hello_markup_handler)
 
 
-# We use TranslatorCl object to translate .docx and .txt files
+# We use TranslatorCl object to translate .docx and .txt files there
 # An exception because translating of file can make some problems
 @bot.message_handler(content_types=["document"])
 def docs_handler(message):
@@ -82,6 +87,32 @@ def docs_handler(message):
                                                 "Try to send me another file.",
                                reply_markup=keyboards.set_type_markup())
         bot.register_next_step_handler(msg, set_type_markup_handler)
+
+
+# We use TranslatorCl object to translate the text from the url
+# Also we use scraper module to get the text from the url
+@bot.message_handler(content_types=["text"])
+def url_handler(message):
+    try:
+        url_scraper = scraper.ScraperCl(message.text)
+        if url_scraper.soup is not None:
+            msg = bot.send_message(message.chat.id, translator.Translation(url_scraper.get_title()))
+            for i in url_scraper.get_content():
+                bot.send_message(message.chat.id, translator.Translation(i))
+            bot.register_next_step_handler(msg, hello_markup_handler)
+        else:
+            msg = bot.send_message(message.chat.id, "There is no url! "
+                                                    "Please, send me a real link.")
+            bot.register_next_step_handler(msg, url_handler)
+    except OSError:
+        print("Url_Handler Error - Try again after 5 secs")
+        time.sleep(5)
+        msg = bot.send_message(message.chat.id, "Ooops, something gone wrong. "
+                                                "Try to send me another link.",
+                               reply_markup=keyboards.set_type_markup())
+        bot.register_next_step_handler(msg, set_type_markup_handler)
+
+
 
 
 # A stuff for bot working
