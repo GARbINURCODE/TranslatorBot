@@ -6,22 +6,25 @@ translator = Translator()
 
 # Class Translator here
 class TranslatorCl:
-    fromlang = ""
+    fromlang = None
     tolang = ''
 
 # The Constructor here
     def __init__(self):
-        self.fromlang = ""
-        self.tolang = ""
+        self.fromlang = None
+        self.tolang = ''
 
 # Setting home language
     def Set_From_Lan(self, fl):
         self.fromlang = fl
 
+    def Set_To_Lan(self, tl):
+        self.tolang = tl
+
 # Translation of a text
     def Translation(self, text):
-        result = translator.translate(text,
-                                      src=self.fromlang)
+        result = translator.translate(text, src=self.fromlang,
+                                      dest=self.tolang)
         return result.text
 
 # The method translates .docx files
@@ -34,8 +37,9 @@ class TranslatorCl:
         file = docx.Document(file_path)
         paragraphs = file.paragraphs
         for paragraph in paragraphs:
-            if paragraph.text is not None:
-                translated_text = translator.translate(paragraph.text, src=self.fromlang)
+            if paragraph.text != '':
+                translated_text = translator.translate(paragraph.text, src=self.fromlang,
+                                                       dest=self.tolang)
                 doc.add_paragraph(translated_text.text, paragraph.style.name)
             else:
                 doc.add_paragraph(paragraph.text, paragraph.style.name)
@@ -50,6 +54,7 @@ class TranslatorCl:
         name = 'documents/Translated_text.txt'
         with open(name, 'w') as translated_file, open(file_path, 'r') as file:
             text = file.read()
-            translated_text = translator.translate(text, src=self.fromlang)
+            translated_text = translator.translate(text, src=self.fromlang,
+                                                   dest=self.tolang)
             translated_file.write(translated_text.text)
             return name

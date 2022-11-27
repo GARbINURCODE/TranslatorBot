@@ -23,20 +23,26 @@ def start(message):
 # The handler of the markup u can see above
 @bot.message_handler(content_types=["text"])
 def hello_markup_handler(message):
-    if message.text == 'Set home language':
-        msg = bot.send_message(message.chat.id, "What is ur home language?")
-        bot.register_next_step_handler(msg, set_home_lan)
+    if message.text == 'Set languages':
+        msg = bot.send_message(message.chat.id, "What is the language of this text?",
+                               reply_markup=keyboards.languages_markup())
+        bot.register_next_step_handler(msg, languages_markup_handler)
 
 
-# Setting new home language
-# Suggestion to choose if we want to translate a text or a document
-# For the suggestion we use the other markup
-def set_home_lan(message):
-    translator.Set_From_Lan(message.text)
-    bot.reply_to(message, "It`s ur new home language!")
-    msg = bot.send_message(message.chat.id, "What do u want to translate?",
-                           reply_markup=keyboards.set_type_markup())
-    bot.register_next_step_handler(msg, set_type_markup_handler)
+@bot.message_handler(content_types=["text"])
+def languages_markup_handler(message):
+    if translator.fromlang is None:
+        translator.Set_From_Lan(message.text.lower())
+        bot.send_message(message.chat.id, "It`s ur home language!")
+        msg = bot.send_message(message.chat.id, "What is the language u want to get this text in?",
+                               reply_markup=keyboards.languages_markup())
+        bot.register_next_step_handler(msg, languages_markup_handler)
+    else:
+        translator.Set_To_Lan(message.text.lower())
+        bot.send_message(message.chat.id, "It`s ur new language!")
+        msg = bot.send_message(message.chat.id, 'What do u want to translate?',
+                               reply_markup=keyboards.set_type_markup())
+        bot.register_next_step_handler(msg, set_type_markup_handler)
 
 
 # The handler of the markup u can see above
@@ -52,11 +58,20 @@ def set_type_markup_handler(message):
         bot.register_next_step_handler(msg, url_handler)
 
 
+def set_to_lan(message):
+    msg = bot.send_message(message.chat.id, 'What do u want to translate?',
+                           reply_markup=keyboards.set_type_markup())
+    bot.register_next_step_handler(msg, set_type_markup_handler)
+
+
 # We use TranslatorCl object to translate this text
 @bot.message_handler(content_types=["text"])
 def text_handler(message):
     msg = bot.send_message(message.chat.id, translator.Translation(message.text),
                            reply_markup=keyboards.hello_markup())
+    bot.register_next_step_handler(msg, hello_markup_handler)
+    translator.Set_To_Lan(None)
+    translator.Set_From_Lan(None)
     bot.register_next_step_handler(msg, hello_markup_handler)
 
 
@@ -70,7 +85,7 @@ def docs_handler(message):
         bot.send_message(message.chat.id, "Please, wait a sec...")
         with open(file_info.file_path, 'wb') as new_file:
             new_file.write(downloaded_file)
-        doc = ''
+        doc = None
         if file_info.file_path.endswith(".docx"):
             doc = translator.Docx_Translation(file_info.file_path)
         elif file_info.file_path.endswith(".txt"):
@@ -79,14 +94,18 @@ def docs_handler(message):
         msg = bot.send_document(message.chat.id, file,
                                 reply_markup=keyboards.hello_markup())
         file.close()
+        translator.Set_To_Lan(None)
+        translator.Set_From_Lan(None)
         bot.register_next_step_handler(msg, hello_markup_handler)
-    except OSError:
+    except Exception:
         print("Docs_Handler Error - Try again after 5 secs")
         time.sleep(5)
         msg = bot.send_message(message.chat.id, "Ooops, something gone wrong. "
                                                 "Try to send me another file.",
-                               reply_markup=keyboards.set_type_markup())
-        bot.register_next_step_handler(msg, set_type_markup_handler)
+                               reply_markup=keyboards.hello_markup())
+        translator.Set_To_Lan(None)
+        translator.Set_From_Lan(None)
+        bot.register_next_step_handler(msg, hello_markup_handler)
 
 
 # We use TranslatorCl object to translate the text from the url
@@ -96,23 +115,27 @@ def url_handler(message):
     try:
         url_scraper = scraper.ScraperCl(message.text)
         if url_scraper.soup is not None:
-            msg = bot.send_message(message.chat.id, translator.Translation(url_scraper.get_title()))
+            bot.send_message(message.chat.id, translator.Translation(url_scraper.get_title()))
             for i in url_scraper.get_content():
                 bot.send_message(message.chat.id, translator.Translation(i))
+            translator.Set_To_Lan(None)
+            translator.Set_From_Lan(None)
+            msg = bot.send_message(message.chat.id, "Do u want to translate something else?",
+                                   reply_markup=keyboards.hello_markup())
             bot.register_next_step_handler(msg, hello_markup_handler)
         else:
             msg = bot.send_message(message.chat.id, "There is no url! "
                                                     "Please, send me a real link.")
             bot.register_next_step_handler(msg, url_handler)
-    except OSError:
+    except Exception:
         print("Url_Handler Error - Try again after 5 secs")
         time.sleep(5)
         msg = bot.send_message(message.chat.id, "Ooops, something gone wrong. "
                                                 "Try to send me another link.",
-                               reply_markup=keyboards.set_type_markup())
-        bot.register_next_step_handler(msg, set_type_markup_handler)
-
-
+                               reply_markup=keyboards.hello_markup())
+        translator.Set_To_Lan(None)
+        translator.Set_From_Lan(None)
+        bot.register_next_step_handler(msg, hello_markup_handler)
 
 
 # A stuff for bot working

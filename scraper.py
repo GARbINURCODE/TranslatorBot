@@ -7,7 +7,8 @@ class ScraperCl:
     def __init__(self, url):
         self.url = url
         if self.url is not None and "https://" in self.url:
-            self.soup = BeautifulSoup(requests.get(url).text, 'html.parser')
+            self.response = requests.get(self.url).text
+            self.soup = BeautifulSoup(self.response, 'html.parser')
         else:
             self.soup = None
 
@@ -17,6 +18,6 @@ class ScraperCl:
     def get_content(self):
         text = []
         for i in self.soup.find_all('p'):
-            if i.string is not None and i.string != '\xa0' or '\n':
+            if i.string != '\xa0' and i.string != '\n':
                 text.append(i.text)
         return text
