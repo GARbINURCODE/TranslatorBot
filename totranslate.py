@@ -7,12 +7,12 @@ translator = Translator()
 # Class Translator here
 class TranslatorCl:
     fromlang = None
-    tolang = ''
+    tolang = None
 
 # The Constructor here
     def __init__(self):
         self.fromlang = None
-        self.tolang = ''
+        self.tolang = None
 
 # Setting home language
     def Set_From_Lan(self, fl):
@@ -58,3 +58,19 @@ class TranslatorCl:
                                                    dest=self.tolang)
             translated_file.write(translated_text.text)
             return name
+
+    def Chat_Translation(self, text):
+        text = text.lower()
+        try:
+            result = translator.translate(text, src=self.fromlang,
+                                          dest=self.tolang)
+            if result.text.lower() == text or translator.detect(text).lang == self.tolang:
+                result = translator.translate(text, src=self.tolang,
+                                              dest=self.fromlang)
+            return result.text.lower()
+        except Exception:
+            return "I can't translate this text:("
+
+    def forget(self):
+        self.fromlang = None
+        self.tolang = None
