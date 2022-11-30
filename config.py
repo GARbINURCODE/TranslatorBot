@@ -1,3 +1,4 @@
+# it is bot token and the list of languages that I don`t use:)
 token = "5464794817:AAHbBDQgZeKD08OyEx7qPQBhRYts634pR9w"
 languages = {
     'afrikaans':  'af',

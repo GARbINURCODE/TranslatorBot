@@ -6,71 +6,72 @@ translator = Translator()
 
 # Class Translator here
 class TranslatorCl:
-    fromlang = None
-    tolang = None
+    from_lang = None  # first language
+    to_lang = None  # second language
 
 # The Constructor here
     def __init__(self):
-        self.fromlang = None
-        self.tolang = None
+        self.from_lang = None
+        self.to_lang = None
 
-# Setting home language
-    def Set_From_Lan(self, fl):
-        self.fromlang = fl
+# Setting the first(home) language
+    def set_from_lan(self, fl):
+        self.from_lang = fl
 
-    def Set_To_Lan(self, tl):
-        self.tolang = tl
+# Setting the second language(to translate in)
+    def set_to_lan(self, tl):
+        self.to_lang = tl
 
 # Translation of a text
-    def Translation(self, text):
-        result = translator.translate(text, src=self.fromlang,
-                                      dest=self.tolang)
+    def translate(self, text):
+        result = translator.translate(text, src=self.from_lang,
+                                      dest=self.to_lang)
         return result.text
 
 # The method translates .docx files
-# We make a new .docx file and open the one we want to translate
-# Read each paragraph in translating file and write translated text in new one
-# We should copy a paragraph style too!!!
-# Save new file and return its path
-    def Docx_Translation(self, file_path):
-        doc = docx.Document()
-        file = docx.Document(file_path)
-        paragraphs = file.paragraphs
+    def translate_docx(self, file_path):
+        doc = docx.Document()  # create new docx file
+        file = docx.Document(file_path)  # open the file to translate
+        paragraphs = file.paragraphs  # get all paragraphs
         for paragraph in paragraphs:
-            if paragraph.text != '':
-                translated_text = translator.translate(paragraph.text, src=self.fromlang,
-                                                       dest=self.tolang)
-                doc.add_paragraph(translated_text.text, paragraph.style.name)
+            if paragraph.text != '':  # check if paragraph is not empty
+                translated_text = translator.translate(paragraph.text, src=self.from_lang,
+                                                       dest=self.to_lang)  # translate paragraph
+                doc.add_paragraph(translated_text.text, paragraph.style.name)  # add translated paragraph to new file
             else:
-                doc.add_paragraph(paragraph.text, paragraph.style.name)
-        name = 'documents/Translated_text.docx'
-        doc.save(name)
+                doc.add_paragraph(paragraph.text, paragraph.style.name)  # add empty paragraph to new file
+        name = 'documents/Translated_text.docx'  # name of the new file
+        doc.save(name)  # save new file
         return name
 
 # Translates .txt files
 # Just read translating file, translate its text, write translated text in new file
 # Save translated file and return its path
-    def Txt_Transaltion(self, file_path):
-        name = 'documents/Translated_text.txt'
-        with open(name, 'w') as translated_file, open(file_path, 'r') as file:
-            text = file.read()
-            translated_text = translator.translate(text, src=self.fromlang,
-                                                   dest=self.tolang)
-            translated_file.write(translated_text.text)
+    def translate_txt(self, file_path):
+        name = 'documents/Translated_text.txt'  # name of the new file
+        with open(name, 'w') as translated_file, open(file_path, 'r') as file:  # open files
+            text = file.read()  # read text from file
+            translated_text = translator.translate(text, src=self.from_lang,
+                                                   dest=self.to_lang)  # translate text
+            translated_file.write(translated_text.text)  # write translated text in new file
             return name
 
-    def Chat_Translation(self, text):
-        text = text.lower()
-        try:
-            result = translator.translate(text, src=self.fromlang,
-                                          dest=self.tolang)
-            if result.text.lower() == text or translator.detect(text).lang == self.tolang:
-                result = translator.translate(text, src=self.tolang,
-                                              dest=self.fromlang)
-            return result.text.lower()
-        except Exception:
+    def translate_for_chat(self, text):
+        text = text.lower()  # make text lower case
+        try:  # try to translate text
+            result = translator.translate(text, src=self.from_lang,
+                                          dest=self.to_lang)  # translate text
+            # check if text is not in the first language
+            if result.text.lower() == text or translator.detect(text).lang == self.to_lang:
+                result = translator.translate(text, src=self.to_lang,
+                                              dest=self.from_lang)  # translate text
+            return result.text.lower()  # return translated text
+        except Exception:  # if translation failed
+            print("Chat_Translator Error - Try again after 5 secs")
             return "I can't translate this text:("
+            # return error message
 
+# The method to clear properties of the class
     def forget(self):
-        self.fromlang = None
-        self.tolang = None
+        self.from_lang = None
+        self.to_lang = None

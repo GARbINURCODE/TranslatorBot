@@ -1,5 +1,9 @@
 from telebot import types
 
+# There are some functions to create markup
+# Markup is a keyboard with buttons
+# Markup is needed to make the bot more user-friendly
+
 
 def hello_markup():
     markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
@@ -14,7 +18,9 @@ def set_type_markup():
     button1 = types.KeyboardButton('Just a text')
     button2 = types.KeyboardButton('A document')
     button3 = types.KeyboardButton('An article from the Internet')
-    markup.add(button1, button2, button3)
+    button4 = types.KeyboardButton('Exit')
+    markup.row(button1, button2, button3)
+    markup.row(button4)
     return markup
 
 
