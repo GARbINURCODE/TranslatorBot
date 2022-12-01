@@ -36,7 +36,7 @@ The bot uses the [pyTelegramBotAPI](https://github.com/eternnoir/pyTelegramBotAP
 
 - **Translation of web-pages**
   
-    To translate web-pages, the bot have to srap them.
+    To translate web-pages the bot have to srap them.
     For scrapping the bot uses the [requests](https://docs.python-requests.org/en/master/) and 
     [beatifulsoup4](https://pypi.org/project/beautifulsoup4/) library. 
     We get and translate the title and context(/p) of the page.
@@ -52,7 +52,7 @@ The bot uses the [pyTelegramBotAPI](https://github.com/eternnoir/pyTelegramBotAP
     Nota bene: the bot translates messages it both ways: from the 1st language to the 2nd one
     and from the 2nd language to the 1st one.
 > **Note:** The bot is still in development. There are a lot of problems
-> in translating from Japanese and Russian. We`d reccoemend you not to use them.
+> in translating from Japanese and Russian. We`d recommemend you not to use them.
 ## Usage
 - [googletrans-py](https://cloud.google.com/translate/docs/setup)
 - [pyTelegramBotAPI](https://github.com/eternnoir/pyTelegramBotAPI)
